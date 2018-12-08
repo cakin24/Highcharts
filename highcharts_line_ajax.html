@@ -1,0 +1,130 @@
+<html>
+<head>
+   <title>Highcharts 异步加载数据曲线图表</title>
+   <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+   <script src="http://code.highcharts.com/highcharts.js"></script>
+    <!--异步加载数据需要引入以下js 文件-->
+   <script src="http://code.highcharts.com/modules/data.js"></script>
+</head>
+<body>
+<div id="container" style="width: 550px; height: 400px; margin: 0 auto"></div>
+<script language="JavaScript">
+$(document).ready(function() {
+   var title = {
+      text: '每日访问量www.highcharts.com'
+   };
+   var subtitle = {
+      text: 'Google分析'
+   };
+   var xAxis = {
+      tickInterval: 7 * 24 * 3600 * 1000, //以每周为间隔设置 X 轴：
+      tickWidth: 0,
+      gridLineWidth: 5, //网格(竖线)宽度
+      //设置X轴各分类名称的样式style
+      labels: {
+         align: 'left',
+         x: 3,
+         y: -3
+      }
+   };
+   var yAxis = [{ // 左边y轴
+         //标题为空
+         title: {
+            text: null
+         },
+         //左标签样式
+         labels: {
+            align: 'left',
+            x: 3,
+            y: 16,
+            format: '{value:.,0f}'
+         },
+         showFirstLabel: false
+      },{ // 右边y轴
+         linkedTo: 0,
+         gridLineWidth: 0,
+         opposite: true,
+         title: {
+            text: null
+         },
+         labels: {
+            align: 'right',
+            x: -3,
+            y: 16,
+            format: '{value:.,0f}'
+         },
+         showFirstLabel: false
+      }
+   ];
+
+   var tooltip = {
+      shared: true, //是否显示所有的交叉线数据
+      crosshairs: true  //十字交叉线
+   }
+
+   var legend = {
+      align: 'left',  //对齐方式
+      verticalAlign: 'top',
+      y: 20,
+      floating: false,   //是否可以浮动
+      borderWidth: 0
+   };
+
+   //用于设置图表中的数据点相关属性
+   var plotOptions = {
+      series: {
+         cursor: 'pointer',
+         point: {
+            events: {
+               click: function (e) {
+                  hs.htmlExpand(null, {
+                     pageOrigin: {
+                        x: e.pageX || e.clientX,
+                        y: e.pageY || e.clientY
+                     },
+                     headingText: this.series.name,
+                     maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x)
+                        + ':<br/> ' + this.y + ' visits',
+                     width: 200
+                  });
+               }
+            }
+         },
+         marker: {
+            lineWidth: 1
+         }
+      }
+   }
+
+   var series =  [{
+         name: 'All visits',
+         lineWidth: 4,
+         marker: {
+            radius: 4
+         }
+      }, {
+         name: 'New visitors'
+      }]
+
+   var json = {};
+
+   json.title = title;
+   json.subtitle = subtitle;
+   json.xAxis = xAxis;
+   json.yAxis = yAxis;
+   json.tooltip = tooltip;
+   json.legend = legend;
+   json.series = series;
+   json.plotOptions = plotOptions;
+   //数据源
+   $.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=analytics.csv&callback=?', function (csv) {
+      var data = {
+         csv: csv
+      };
+      json.data = data;
+      $('#container').highcharts(json);
+   });
+});
+</script>
+</body>
+</html>
